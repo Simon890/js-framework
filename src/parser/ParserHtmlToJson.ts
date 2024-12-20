@@ -11,11 +11,12 @@ export class ParserHtmlToJson {
 
     private _pos = 0;
 
-    private _component() : ASTComponent {
+    private _component(isTemplateTag = false) : ASTComponent {
         const token = this._currentToken();
         if(token.key == "OpenTag") {
             this._eat("OpenTag");
             const nameToken = this._eat("String") as StringToken;
+            if(isTemplateTag && nameToken.value != "template") throw new Error("First tag must be <template>")
             const attributes = this._attributes();
             this._eat("CloseTag");
             const body = this._body();
@@ -134,7 +135,7 @@ export class ParserHtmlToJson {
         while(!this._isEOF()) {
             const token = this._currentToken();
             if(token.key == "OpenTag") {
-                this._ast.template.push(this._component());
+                this._ast.template.push(this._component(true));
                 continue;
             }
             if(token.key == "String") {
